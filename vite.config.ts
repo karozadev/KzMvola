@@ -20,6 +20,7 @@ export default defineConfig({
         background_color: '#020617',
         display: 'standalone',
         start_url: '/',
+        lang: 'fr',
         icons: [
           {
             src: '/favicon.svg',
