@@ -61,22 +61,31 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      # appleboy/scp-action et appleboy/ssh-action sont des actions Docker :
-      # seul le dossier du workspace est monté dans leur conteneur, et
-      # toujours au chemin fixe /github/workspace (pas le chemin hôte réel).
-      # On écrit donc la clé décodée dans le workspace, mais on la référence
-      # via ce chemin conteneur dans les steps appleboy/*.
+      # appleboy/scp-action et appleboy/ssh-action tournent dans leur propre
+      # conteneur Docker, sous un utilisateur différent de celui qui écrit
+      # les fichiers sur le runner : un fichier de clé partagé via un chemin
+      # (même monté) se heurte à des soucis de path et de permissions selon
+      # les UID. On passe donc directement le contenu décodé de la clé en
+      # entrée `key`, ce qui évite tout partage de fichier entre conteneurs.
       - name: Decode SSH key
+        id: decode-key
         run: |
-          echo "${{ secrets.VPS_SSH_KEY }}" | base64 -d > "$GITHUB_WORKSPACE/deploy_key"
-          chmod 600 "$GITHUB_WORKSPACE/deploy_key"
+          KEY=$(echo "${{ secrets.VPS_SSH_KEY }}" | base64 -d)
+          while IFS= read -r line; do
+            [ -n "$line" ] && echo "::add-mask::$line"
+          done <<< "$KEY"
+          {
+            echo "key<<SSH_KEY_EOF"
+            echo "$KEY"
+            echo "SSH_KEY_EOF"
+          } >> "$GITHUB_OUTPUT"
 
       - name: Copy kzmvola-compose.yml to VPS
         uses: appleboy/scp-action@v0.1.7
         with:
           host: ${{ secrets.VPS_HOST }}
           username: ${{ secrets.VPS_USER }}
-          key_path: /github/workspace/deploy_key
+          key: ${{ steps.decode-key.outputs.key }}
           port: ${{ secrets.VPS_PORT || 22 }}
           source: "deploy/kzmvola-compose.yml"
           target: ${{ secrets.VPS_DEPLOY_PATH }}
@@ -91,7 +100,7 @@ jobs:
         with:
           host: ${{ secrets.VPS_HOST }}
           username: ${{ secrets.VPS_USER }}
-          key_path: /github/workspace/deploy_key
+          key: ${{ steps.decode-key.outputs.key }}
           port: ${{ secrets.VPS_PORT || 22 }}
           envs: GH_ACTOR,GH_TOKEN,DEPLOY_PATH
           script: |
@@ -101,7 +110,3 @@ jobs:
             docker compose -f kzmvola-compose.yml pull
             docker compose -f kzmvola-compose.yml up -d
             docker image prune -f
-
-      - name: Remove decoded SSH key
-        if: always()
-        run: rm -f "$GITHUB_WORKSPACE/deploy_key"
