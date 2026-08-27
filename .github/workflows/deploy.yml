@@ -10,7 +10,32 @@ permissions:
   packages: write
 
 jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Tests
+        run: npm test
+
+      - name: Build
+        run: npm run build
+
   build-and-push:
+    needs: verify
     runs-on: ubuntu-latest
     outputs:
       image: ${{ steps.meta.outputs.image }}
@@ -55,9 +80,9 @@ jobs:
       #                    à une clé publique autorisée sur le VPS
       #   VPS_PORT         port SSH du VPS (optionnel, 22 par défaut)
       #   VPS_DEPLOY_PATH  dossier absolu sur le VPS où déposer
-      #                    kzmvola-compose.yml (ex: /home/deployer, partagé
-      #                    avec d'autres projets — nom de fichier dédié pour
-      #                    ne pas écraser leur docker-compose.yml)
+      #                    kzmvola-compose.yml (dossier éventuellement
+      #                    partagé avec d'autres projets — nom de fichier
+      #                    dédié pour ne pas écraser leur docker-compose.yml)
       - name: Checkout
         uses: actions/checkout@v4
 

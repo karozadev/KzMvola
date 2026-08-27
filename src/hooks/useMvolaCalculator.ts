@@ -3,6 +3,12 @@ import type { CalculationResult } from '../types/mvola';
 import { MAX_AMOUNT, calculateMvolaFees } from '../utils/mvolaFeeCalculator';
 import { formatNumber, parseAmountInput } from '../utils/format';
 
+/** Lit un montant initial depuis `?montant=` dans l'URL (lien partageable, captures). */
+function readAmountFromUrl(): number {
+  if (typeof window === 'undefined') return 0;
+  return parseAmountInput(new URLSearchParams(window.location.search).get('montant') ?? '');
+}
+
 export interface UseMvolaCalculator {
   rawInput: string;
   amount: number;
@@ -14,8 +20,8 @@ export interface UseMvolaCalculator {
 
 /** Gère l'état de saisie du montant et déclenche le calcul d'optimisation MVola à chaque changement. */
 export function useMvolaCalculator(): UseMvolaCalculator {
-  const [amount, setAmount] = useState(0);
-  const [rawInput, setRawInput] = useState('');
+  const [amount, setAmount] = useState(readAmountFromUrl);
+  const [rawInput, setRawInput] = useState(() => (amount > 0 ? formatNumber(amount) : ''));
 
   const handleAmountChange = (raw: string) => {
     const parsed = parseAmountInput(raw);

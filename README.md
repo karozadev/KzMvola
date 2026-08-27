@@ -11,6 +11,7 @@
   ![Open Source](https://img.shields.io/badge/Open%20Source-%E2%9D%A4-10b981)
   ![Made with React](https://img.shields.io/badge/React-19-020617)
   ![Made with TypeScript](https://img.shields.io/badge/TypeScript-6-020617)
+  ![Tests: Vitest](https://img.shields.io/badge/tests-Vitest-46d369)
 </div>
 
 ---
@@ -24,13 +25,21 @@
 
 L'économie réalisée entre les deux options est affichée instantanément à chaque saisie.
 
+<div align="center">
+  <img src="docs/screenshots/mobile.png" alt="KzMvola sur mobile" height="460" />
+  &nbsp;&nbsp;
+  <img src="docs/screenshots/desktop.png" alt="KzMvola sur desktop" height="460" />
+</div>
+
 ## Fonctionnalités
 
 - ⚡ Calcul instantané pendant la saisie, sans rechargement de page
 - 🔢 Formatage automatique des milliers (`265 000 Ar`) avec un curseur qui reste à sa place
 - 🧮 Algorithme d'optimisation exhaustif basé sur les sommets de paliers tarifaires (250 000 / 500 000 / 1 000 000 Ar)
+- 🔗 Lien partageable : `?montant=265000` pré-remplit le montant à l'ouverture
 - 📱 PWA installable, pensée pour une utilisation rapide sur mobile
-- 🎨 Design flat, sans dégradé, entièrement responsive
+- 🎨 Interface responsive au style « Netflix » (noir profond, rouge MVola, accents verts)
+- ✅ Logique de calcul couverte par des tests ([Vitest](https://vitest.dev/))
 
 ## Grille tarifaire MVola (Cash Point)
 
@@ -71,6 +80,7 @@ L'économie réalisée entre les deux options est affichée instantanément à c
 - [React 19](https://react.dev/) + [TypeScript](https://www.typescriptlang.org/)
 - [Vite](https://vite.dev/) + [vite-plugin-pwa](https://vite-pwa-org.netlify.app/)
 - [Tailwind CSS 4](https://tailwindcss.com/)
+- [Vitest](https://vitest.dev/) + [Testing Library](https://testing-library.com/) pour les tests
 
 ## Démarrage
 
@@ -81,9 +91,35 @@ npm install
 # Lancer le serveur de développement
 npm run dev
 
+# Lancer les tests
+npm test              # une passe
+npm run test:watch    # mode watch
+npm run test:coverage # avec rapport de couverture
+
+# Vérifier le style
+npm run lint
+
 # Construire pour la production
 npm run build
 ```
+
+## Tests
+
+Les tests (`*.test.ts` / `*.test.tsx`, à côté du code qu'ils couvrent)
+protègent contre les régressions sur :
+
+- **la grille tarifaire et l'optimisation** (`src/utils/mvolaFeeCalculator.test.ts`) :
+  frais par palier, cohérence des décompositions, garantie que le
+  fractionnement ne coûte jamais plus cher que le retrait direct, respect
+  du minimum de 100 Ar par retrait ;
+- **le formatage des montants** (`src/utils/format.test.ts`) : séparateurs
+  de milliers, analyse de saisie, repositionnement du curseur ;
+- **le hook et l'interface** (`src/hooks/useMvolaCalculator.test.ts`,
+  `src/App.test.tsx`) : calcul en temps réel, dépassement de plafond,
+  initialisation depuis `?montant=`.
+
+Ils sont également exécutés en CI (job `verify`) avant tout build ou
+déploiement.
 
 ## Structure du projet
 
@@ -98,7 +134,11 @@ src/
 │   ├── CalculatorForm.tsx
 │   ├── DirectOptionCard.tsx
 │   └── OptimizedOptionCard.tsx
+├── test/setup.ts                # Configuration Vitest / Testing Library
+├── *.test.ts(x)                 # Tests unitaires et d'intégration
 └── App.tsx
+
+docs/                            # Captures et gabarit de l'aperçu de partage
 ```
 
 ## Déploiement

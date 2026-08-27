@@ -18,7 +18,7 @@ function App() {
           </span>
         </div>
 
-        <header className="nfx-hero-glow px-5 pb-9 pt-6 md:px-10 md:pb-14 md:pt-12">
+        <header className="nfx-hero-glow px-5 pb-8 pt-6 md:px-10 md:pb-10 md:pt-12">
           <div className="mb-4 flex flex-wrap gap-2">
             <span className="bg-nfx-red px-2.5 py-1.5 text-[11px] font-extrabold uppercase tracking-[0.06em] text-nfx-white">
               Top frais

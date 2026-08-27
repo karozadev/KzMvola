@@ -29,7 +29,7 @@ export function CalculatorForm({ rawInput, isOverLimit, onAmountChange }: Calcul
     <div className="w-full md:max-w-xl">
       <label
         htmlFor="amount"
-        className="mb-2.5 mt-8 block text-[11px] font-bold uppercase tracking-[0.1em] text-nfx-grey"
+        className="mb-2.5 mt-7 block text-[11px] font-bold uppercase tracking-[0.1em] text-nfx-grey"
       >
         Montant total à retirer
       </label>

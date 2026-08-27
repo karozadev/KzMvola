@@ -19,7 +19,7 @@ export function OptimizedOptionCard({ optimized, direct, savings }: OptimizedOpt
           Retrait fractionné
         </span>
         <span className="text-[13px] font-extrabold text-nfx-green">
-          {hasSplit && savedPct > 0 ? `${savedPct}% optimisé` : 'Optimal'}
+          {hasSplit && savedPct > 0 ? `${savedPct}% de frais en moins` : 'Optimal'}
         </span>
       </div>
 

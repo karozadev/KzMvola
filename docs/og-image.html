@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8" />
+<title>KzMvola — source de l'aperçu de partage (og-image.png)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link
+  href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@600;700&display=swap"
+  rel="stylesheet"
+/>
+<style>
+  /*
+   * Source de public/og-image.png (1200 x 630).
+   * Régénérer après toute retouche :
+   *   npm run build && npm run preview   # sert /docs à http://localhost:4173/docs/og-image.html
+   *   chromium-browser --headless --disable-gpu --window-size=1200,630 \
+   *     --screenshot=public/og-image.png http://localhost:4173/docs/og-image.html
+   */
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html, body { width: 1200px; height: 630px; overflow: hidden; }
+
+  body {
+    background:
+      linear-gradient(180deg, rgba(229, 9, 20, 0.18) 0%, transparent 55%),
+      radial-gradient(ellipse at 22% -10%, rgba(229, 9, 20, 0.35), transparent 55%),
+      #0a0a0a;
+    color: #f5f5f1;
+    font-family: 'Inter', system-ui, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    padding: 44px 72px 36px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+  }
+
+  .main { display: flex; flex-direction: column; }
+
+  .top { display: flex; align-items: center; justify-content: space-between; margin-bottom: 28px; }
+
+  .brand { font-family: 'Archivo Black', sans-serif; font-size: 40px; color: #e50914; letter-spacing: -0.02em; }
+
+  .domain { font-family: 'JetBrains Mono', monospace; font-size: 20px; color: #b3b3b3; }
+
+  .tags { display: flex; gap: 12px; margin-bottom: 20px; }
+  .tag {
+    font-size: 15px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.08em;
+    padding: 7px 14px;
+  }
+  .tag-red { background: #e50914; color: #fff; }
+  .tag-line { border: 1px solid #b3b3b3; color: #b3b3b3; }
+
+  h1 {
+    font-family: 'Archivo Black', sans-serif;
+    font-size: 50px;
+    line-height: 1.05;
+    text-transform: uppercase;
+    letter-spacing: -0.015em;
+    max-width: 20ch;
+  }
+
+  p.sub { margin: 16px 0 26px; font-size: 21px; line-height: 1.45; color: #b3b3b3; max-width: 52ch; }
+
+  .compare {
+    display: flex; align-items: stretch; gap: 18px;
+  }
+  .chip {
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    background: #181818;
+    padding: 14px 20px;
+    display: flex; flex-direction: column; gap: 5px;
+  }
+  .chip .k { font-size: 12px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.08em; color: #b3b3b3; }
+  .chip .v { font-family: 'JetBrains Mono', monospace; font-size: 27px; font-weight: 700; }
+  .chip.direct { border-left: 3px solid #e50914; }
+  .chip.direct .v { color: #e50914; text-decoration: line-through; text-decoration-thickness: 2px; }
+  .chip.opt { border-left: 3px solid #46d369; }
+  .chip.opt .v { color: #46d369; }
+  .chip.save { border-left: 3px solid #46d369; background: rgba(70, 211, 105, 0.12); justify-content: center; }
+  .chip.save .v { font-family: 'Archivo Black', sans-serif; color: #46d369; font-size: 26px; }
+
+  .foot { display: flex; align-items: center; justify-content: space-between; font-size: 16px; color: rgba(255,255,255,0.55); }
+  .foot .dev { color: #e50914; font-weight: 700; }
+</style>
+</head>
+<body>
+  <div class="main">
+    <div class="top">
+      <span class="brand">KZ MVOLA</span>
+      <span class="domain">mvola.karoza.dev</span>
+    </div>
+
+    <div class="tags">
+      <span class="tag tag-red">Top frais</span>
+      <span class="tag tag-line">Grille 2026</span>
+    </div>
+    <h1>Optimiseur de frais de retrait MVola</h1>
+    <p class="sub">
+      Retrait direct ou retrait fractionné : trouvez la manière la moins chère de retirer votre argent.
+    </p>
+
+    <div class="compare">
+      <div class="chip direct">
+        <span class="k">Retrait direct · 265 000 Ar</span>
+        <span class="v">4 700 Ar</span>
+      </div>
+      <div class="chip opt">
+        <span class="k">Retrait fractionné</span>
+        <span class="v">3 825 Ar</span>
+      </div>
+      <div class="chip save">
+        <span class="v">−875 Ar économisés</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="foot">
+    <span>Grille tarifaire MVola Cash Point · Madagascar</span>
+    <span>Développé par <span class="dev">Stephanot Zafindratafa</span></span>
+  </div>
+</body>
+</html>

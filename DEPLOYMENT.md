@@ -31,7 +31,7 @@ repository secret**.
 | `VPS_USER`        | Utilisateur SSH utilisé pour le déploiement                             |
 | `VPS_SSH_KEY`     | Clé privée SSH **encodée en base64** (`base64 -w0 ~/.ssh/id_ed25519`), dont la clé publique est autorisée sur le VPS |
 | `VPS_PORT`        | Port SSH du VPS (optionnel, `22` par défaut si absent)                  |
-| `VPS_DEPLOY_PATH` | Dossier absolu partagé sur le VPS (ex: `/home/deployer`)                |
+| `VPS_DEPLOY_PATH` | Dossier absolu sur le VPS où déposer `kzmvola-compose.yml`               |
 
 Aucun secret n'est nécessaire pour le registre : l'image est poussée vers
 `ghcr.io` avec le `GITHUB_TOKEN` généré automatiquement par Actions.
