@@ -7,8 +7,9 @@ aperçus de partage.
 
 | Fichier | Format | Contenu |
 | --- | --- | --- |
-| [screenshots/mobile.png](screenshots/mobile.png) | 400 × 1180 | Vue mobile — mode Retrait, exemple à 265 000 Ar |
-| [screenshots/desktop.png](screenshots/desktop.png) | 1400 × 1000 | Vue desktop — mode Transfert « non-abonné », exemple à 300 000 Ar |
+| [screenshots/desktop-retrait.png](screenshots/desktop-retrait.png) | 1440 × 1000 | Mode Retrait, exemple à 265 000 Ar |
+| [screenshots/desktop-transfert-abonne.png](screenshots/desktop-transfert-abonne.png) | 1440 × 1000 | Transfert vers un abonné MVola, exemple à 550 000 Ar |
+| [screenshots/desktop-transfert-non-abonne.png](screenshots/desktop-transfert-non-abonne.png) | 1440 × 1000 | Transfert vers un non-abonné, exemple à 300 000 Ar |
 
 Elles sont prises sur le build de production servi localement, l'état
 (mode / destination / montant) étant pré-rempli via l'URL
@@ -18,15 +19,12 @@ Elles sont prises sur le build de production servi localement, l'état
 npm run build
 npm run preview          # sert http://localhost:4173
 
-# Mobile (Retrait)
-chromium --headless --disable-gpu --hide-scrollbars --window-size=400,1180 \
-  --screenshot=docs/screenshots/mobile.png \
-  "http://localhost:4173/?montant=265000"
+SHOT() { chromium --headless --disable-gpu --hide-scrollbars --window-size=1440,1000 \
+  --screenshot="docs/screenshots/$1.png" "http://localhost:4173/$2"; }
 
-# Desktop (Transfert vers un non-abonné)
-chromium --headless --disable-gpu --hide-scrollbars --window-size=1400,1000 \
-  --screenshot=docs/screenshots/desktop.png \
-  "http://localhost:4173/?mode=transfert&destination=non-abonne&montant=300000"
+SHOT desktop-retrait              "?montant=265000"
+SHOT desktop-transfert-abonne     "?mode=transfert&destination=mvola&montant=550000"
+SHOT desktop-transfert-non-abonne "?mode=transfert&destination=non-abonne&montant=300000"
 ```
 
 ## Aperçu de partage (Open Graph / Twitter Card)

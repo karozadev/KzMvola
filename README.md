@@ -28,9 +28,11 @@ L'économie réalisée entre les deux options est affichée instantanément à c
 > **Toutes les grilles tarifaires de l'application proviennent du tarif officiel MVola : <https://www.mvola.mg/tarifs/>.**
 
 <div align="center">
-  <img src="docs/screenshots/mobile.png" alt="KzMvola sur mobile" height="460" />
-  &nbsp;&nbsp;
-  <img src="docs/screenshots/desktop.png" alt="KzMvola sur desktop" height="460" />
+  <img src="docs/screenshots/desktop-retrait.png" alt="KzMvola — mode Retrait" width="720" />
+  <br /><br />
+  <img src="docs/screenshots/desktop-transfert-abonne.png" alt="KzMvola — Transfert vers un abonné MVola" width="720" />
+  <br /><br />
+  <img src="docs/screenshots/desktop-transfert-non-abonne.png" alt="KzMvola — Transfert vers un non-abonné" width="720" />
 </div>
 
 ## Fonctionnalités
