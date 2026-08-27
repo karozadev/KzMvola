@@ -86,6 +86,14 @@ src/
 └── App.tsx
 ```
 
+## Déploiement
+
+Le projet est packagé en conteneur Docker (Vite build servi par Nginx) et
+déployé automatiquement sur un VPS à chaque push sur `main` via GitHub
+Actions (build → push vers `ghcr.io` → déploiement SSH). Voir
+[DEPLOYMENT.md](./DEPLOYMENT.md) pour la configuration complète (secrets,
+reverse proxy, TLS).
+
 ## Licence
 
 Ce projet est **open source** et distribué sous licence [MIT](./LICENSE). Vous êtes libre de l'utiliser, le modifier et le redistribuer, y compris à des fins commerciales, à condition de conserver la mention de copyright.

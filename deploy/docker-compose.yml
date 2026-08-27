@@ -1,0 +1,9 @@
+services:
+  kzmvola:
+    image: ${IMAGE}:${IMAGE_TAG:-latest}
+    container_name: kzmvola
+    restart: unless-stopped
+    ports:
+      # Le conteneur n'est exposé qu'en local (127.0.0.1) : c'est le Nginx
+      # du VPS (hors conteneur) qui fait office de reverse proxy public.
+      - "127.0.0.1:${APP_PORT:-8080}:80"
