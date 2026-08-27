@@ -7,7 +7,12 @@ import type {
 } from '../types/mvola';
 
 /**
- * Grille tarifaire officielle MVola (Cash Point).
+ * Grille tarifaire officielle MVola (Cash Point), de 100 à 20 000 000 Ar.
+ *
+ * NB : le retrait effectué par un non-abonné MVola (case "RETRAIT PAR UN NON
+ * ABONNÉ MVOLA" du tableau tarifaire) est gratuit mais correspond à un autre
+ * type d'opération que le retrait "Cash Point" standard modélisé ici ; il
+ * n'est donc volontairement pas inclus dans cette grille.
  */
 export const FEE_TIERS: FeeTier[] = [
   { min: 100, max: 1_000, fee: 100 },
@@ -122,7 +127,8 @@ function bestDecomposition(target: number): SplitState {
     // Cas de base : retirer tout `amount` en une seule fois (si couvert par le barème).
     let bestFee = Infinity;
     let bestWithdrawals: Withdrawal[] = [];
-    const directFee = getFeeForAmount(amount);
+    const isUnsplittableRemainder = amount !== target && amount < MIN_AMOUNT;
+    const directFee = isUnsplittableRemainder ? null : getFeeForAmount(amount);
     if (directFee !== null) {
       bestFee = directFee;
       bestWithdrawals = [{ amount, fee: directFee }];
@@ -150,8 +156,7 @@ function bestDecomposition(target: number): SplitState {
 /**
  * Recherche, parmi toutes les décompositions possibles en sommets de
  * palier du barème (+ un reliquat), celle qui minimise la somme des frais
- * MVola pour `amount`. Généralise l'ancienne approche à 3 dénominations
- * fixes (1M/500k/250k) à l'ensemble des 29 paliers du barème.
+ * MVola pour `amount`.
  */
 export function calculateOptimizedSplit(amount: number): OptimizedResult {
   if (amount <= 0) {
