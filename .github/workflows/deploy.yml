@@ -50,8 +50,9 @@ jobs:
       # Secrets à créer dans Settings > Secrets and variables > Actions :
       #   VPS_HOST         adresse IP ou domaine du VPS
       #   VPS_USER         utilisateur SSH utilisé pour le déploiement
-      #   VPS_SSH_KEY      clé privée SSH (format PEM) correspondant à une
-      #                    clé publique autorisée sur le VPS
+      #   VPS_SSH_KEY      clé privée SSH encodée en base64
+      #                    (ex: base64 -w0 ~/.ssh/id_ed25519) correspondant
+      #                    à une clé publique autorisée sur le VPS
       #   VPS_PORT         port SSH du VPS (optionnel, 22 par défaut)
       #   VPS_DEPLOY_PATH  dossier absolu sur le VPS où déposer
       #                    kzmvola-compose.yml (ex: /home/deployer, partagé
@@ -60,12 +61,17 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - name: Decode SSH key
+        run: |
+          echo "${{ secrets.VPS_SSH_KEY }}" | base64 -d > /tmp/deploy_key
+          chmod 600 /tmp/deploy_key
+
       - name: Copy kzmvola-compose.yml to VPS
         uses: appleboy/scp-action@v0.1.7
         with:
           host: ${{ secrets.VPS_HOST }}
           username: ${{ secrets.VPS_USER }}
-          key: ${{ secrets.VPS_SSH_KEY }}
+          key_path: /tmp/deploy_key
           port: ${{ secrets.VPS_PORT || 22 }}
           source: "deploy/kzmvola-compose.yml"
           target: ${{ secrets.VPS_DEPLOY_PATH }}
@@ -80,7 +86,7 @@ jobs:
         with:
           host: ${{ secrets.VPS_HOST }}
           username: ${{ secrets.VPS_USER }}
-          key: ${{ secrets.VPS_SSH_KEY }}
+          key_path: /tmp/deploy_key
           port: ${{ secrets.VPS_PORT || 22 }}
           envs: GH_ACTOR,GH_TOKEN,DEPLOY_PATH
           script: |
@@ -90,3 +96,7 @@ jobs:
             docker compose -f kzmvola-compose.yml pull
             docker compose -f kzmvola-compose.yml up -d
             docker image prune -f
+
+      - name: Remove decoded SSH key
+        if: always()
+        run: rm -f /tmp/deploy_key
