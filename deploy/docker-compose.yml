@@ -1,9 +1,11 @@
 services:
   kzmvola:
-    image: ${IMAGE}:${IMAGE_TAG:-latest}
+    image: ghcr.io/karozadev/kzmvola:latest
     container_name: kzmvola
     restart: unless-stopped
     ports:
-      # Le conteneur n'est exposé qu'en local (127.0.0.1) : c'est le Nginx
-      # du VPS (hors conteneur) qui fait office de reverse proxy public.
-      - "127.0.0.1:${APP_PORT:-8080}:80"
+      # Le conteneur n'est exposé qu'en local (127.0.0.1:8080) : c'est le
+      # Nginx du VPS (hors conteneur) qui fait office de reverse proxy
+      # public. Ce port doit correspondre au proxy_pass dans la config
+      # Nginx (voir deploy/nginx-vps.conf.example).
+      - "127.0.0.1:8080:80"

@@ -2,11 +2,10 @@
 #
 # 1. Copier ce fichier vers /etc/nginx/sites-available/kzmvola.conf
 # 2. Remplacer __DOMAIN__ par ton nom de domaine (ex: kzmvola.exemple.com)
-# 3. Remplacer __APP_PORT__ par la même valeur que APP_PORT dans deploy/.env
-# 4. Activer le site puis recharger Nginx :
+# 3. Activer le site puis recharger Nginx :
 #      sudo ln -s /etc/nginx/sites-available/kzmvola.conf /etc/nginx/sites-enabled/
 #      sudo nginx -t && sudo systemctl reload nginx
-# 5. Générer le certificat TLS (réécrit automatiquement ce fichier avec le bloc HTTPS) :
+# 4. Générer le certificat TLS (réécrit automatiquement ce fichier avec le bloc HTTPS) :
 #      sudo certbot --nginx -d __DOMAIN__
 
 server {
@@ -14,7 +13,7 @@ server {
     server_name __DOMAIN__;
 
     location / {
-        proxy_pass http://127.0.0.1:__APP_PORT__;
+        proxy_pass http://127.0.0.1:8080;
         proxy_http_version 1.1;
         proxy_set_header Host $host;
         proxy_set_header X-Real-IP $remote_addr;
