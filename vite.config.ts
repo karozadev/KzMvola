@@ -16,8 +16,8 @@ export default defineConfig({
         short_name: 'KzMvola',
         description:
           'Calculez le retrait MVola le plus économique à Madagascar en comparant retrait direct et retrait fractionné.',
-        theme_color: '#020617',
-        background_color: '#020617',
+        theme_color: '#0A0A0A',
+        background_color: '#0A0A0A',
         display: 'standalone',
         start_url: '/',
         lang: 'fr',

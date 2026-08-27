@@ -26,11 +26,14 @@ export function CalculatorForm({ rawInput, isOverLimit, onAmountChange }: Calcul
   }, [rawInput]);
 
   return (
-    <div className="w-full">
-      <label htmlFor="amount" className="mb-2 block text-sm font-medium text-slate-400">
+    <div className="w-full md:max-w-xl">
+      <label
+        htmlFor="amount"
+        className="mb-2.5 mt-8 block text-[11px] font-bold uppercase tracking-[0.1em] text-nfx-grey"
+      >
         Montant total à retirer
       </label>
-      <div className="flex w-full items-center rounded-2xl border-2 border-slate-800 bg-slate-900 px-5 py-4 focus-within:border-amber-400">
+      <div className="flex w-full items-center border border-nfx-border border-l-[3px] border-l-nfx-red bg-nfx-panel px-4 py-4">
         <input
           ref={inputRef}
           id="amount"
@@ -40,12 +43,12 @@ export function CalculatorForm({ rawInput, isOverLimit, onAmountChange }: Calcul
           placeholder="Ex : 265 000"
           value={rawInput}
           onChange={handleChange}
-          className="w-full min-w-0 bg-transparent text-2xl font-semibold text-white placeholder:text-slate-600 outline-none"
+          className="w-full min-w-0 bg-transparent font-mono text-[22px] font-bold text-nfx-white placeholder:text-nfx-grey/40 outline-none"
         />
-        <span className="ml-2 shrink-0 text-2xl font-semibold text-slate-500">Ar</span>
+        <span className="ml-2 shrink-0 font-mono text-sm font-semibold text-nfx-grey">Ar</span>
       </div>
       {isOverLimit && (
-        <p className="mt-2 text-sm font-medium text-rose-500">
+        <p className="mt-2 text-sm font-medium text-nfx-red">
           Montant maximum géré par la grille tarifaire : {formatAriary(MAX_AMOUNT)}.
         </p>
       )}

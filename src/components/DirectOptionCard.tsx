@@ -7,22 +7,39 @@ interface DirectOptionCardProps {
 
 export function DirectOptionCard({ direct }: DirectOptionCardProps) {
   return (
-    <div className="flex flex-1 flex-col rounded-2xl border-2 border-slate-800 bg-slate-900 p-6">
-      <span className="mb-4 inline-flex w-fit items-center rounded-full bg-slate-800 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-slate-300">
-        Retrait direct
-      </span>
+    <div className="border border-nfx-border bg-nfx-panel">
+      <div className="flex items-center justify-between border-b border-nfx-border bg-nfx-raised px-[18px] py-3.5">
+        <span className="text-[11px] font-extrabold uppercase tracking-[0.08em] text-nfx-grey">
+          Retrait direct
+        </span>
+        <span className="text-[13px] font-extrabold text-nfx-red">
+          {direct.possible ? 'Coût élevé' : 'Indisponible'}
+        </span>
+      </div>
 
-      <p className="text-sm text-slate-400">Retirer en une seule fois</p>
-      <p className="mt-1 text-3xl font-bold text-white">{formatAriary(direct.amount)}</p>
-
-      <div className="mt-6 border-t border-slate-800 pt-4">
+      <div className="p-[18px]">
         {direct.possible ? (
           <>
-            <p className="text-sm text-slate-400">Frais appliqués</p>
-            <p className="text-2xl font-bold text-rose-500">{formatAriary(direct.fee ?? 0)}</p>
+            <div className="flex items-baseline justify-between">
+              <span className="text-[14.5px] text-nfx-grey">Retirer en une fois</span>
+              <span className="font-mono text-xl font-bold text-nfx-white">
+                {formatAriary(direct.amount)}
+              </span>
+            </div>
+
+            <div className="my-3 border-t border-nfx-border" />
+
+            <div className="flex items-baseline justify-between">
+              <span className="text-sm font-bold uppercase tracking-[0.04em] text-nfx-white">
+                Frais appliqués
+              </span>
+              <span className="font-mono text-[22px] font-extrabold text-nfx-red">
+                {formatAriary(direct.fee ?? 0)}
+              </span>
+            </div>
           </>
         ) : (
-          <p className="text-sm font-medium text-rose-500">
+          <p className="text-sm font-medium text-nfx-red">
             Retrait impossible en une seule transaction (plafond dépassé).
           </p>
         )}
