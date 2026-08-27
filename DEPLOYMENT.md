@@ -6,14 +6,19 @@ Ce projet se déploie automatiquement à chaque push sur `main` :
 push sur main
    → GitHub Actions build l'image Docker
    → l'image est poussée sur GitHub Container Registry (ghcr.io)
+   → GitHub Actions dépose deploy/kzmvola-compose.yml sur le VPS (SCP)
    → GitHub Actions se connecte en SSH au VPS
    → le VPS "pull" la nouvelle image et redémarre le conteneur
 ```
 
 Le conteneur écoute en local sur **`127.0.0.1:8080`** (port fixé dans
-[deploy/docker-compose.yml](deploy/docker-compose.yml)) ; c'est le
+[deploy/kzmvola-compose.yml](deploy/kzmvola-compose.yml)) ; c'est le
 **Nginx du VPS** (hors conteneur, déjà en place) qui sert de reverse proxy
 public et gère le TLS.
+
+Le fichier s'appelle `kzmvola-compose.yml` (et non `docker-compose.yml`)
+car le dossier de déploiement sur le VPS est partagé avec d'autres projets
+qui ont déjà leur propre `docker-compose.yml` — pas de risque d'écrasement.
 
 ## 1. Secrets GitHub Actions à renseigner
 
@@ -26,7 +31,7 @@ repository secret**.
 | `VPS_USER`        | Utilisateur SSH utilisé pour le déploiement                             |
 | `VPS_SSH_KEY`     | Clé privée SSH (format PEM) dont la clé publique est autorisée sur le VPS |
 | `VPS_PORT`        | Port SSH du VPS (optionnel, `22` par défaut si absent)                  |
-| `VPS_DEPLOY_PATH` | Dossier absolu sur le VPS contenant `docker-compose.yml`                |
+| `VPS_DEPLOY_PATH` | Dossier absolu partagé sur le VPS (ex: `/home/deployer`)                |
 
 Aucun secret n'est nécessaire pour le registre : l'image est poussée vers
 `ghcr.io` avec le `GITHUB_TOKEN` généré automatiquement par Actions.
@@ -38,18 +43,14 @@ Aucun secret n'est nécessaire pour le registre : l'image est poussée vers
 
 ## 2. Préparation du VPS (une seule fois)
 
-```bash
-# Sur le VPS
-mkdir -p /opt/kzmvola
-```
+Rien à copier manuellement : le pipeline dépose lui-même
+`kzmvola-compose.yml` dans `VPS_DEPLOY_PATH` à chaque déploiement (via SCP),
+sans toucher aux autres fichiers du dossier (dont le `docker-compose.yml`
+d'un autre projet déjà présent).
 
-Copier [deploy/docker-compose.yml](deploy/docker-compose.yml) tel quel vers
-`/opt/kzmvola/docker-compose.yml` — aucune valeur à remplir dedans, l'image
-et le port (`8080`) y sont déjà fixés.
-
-`VPS_DEPLOY_PATH` (secret GitHub) doit pointer vers ce dossier, ex. `/opt/kzmvola`.
-
-Vérifier que Docker et le plugin `docker compose` sont installés sur le VPS.
+Il suffit de vérifier que :
+- le dossier `VPS_DEPLOY_PATH` existe et est accessible en écriture par `VPS_USER`,
+- Docker et le plugin `docker compose` sont installés sur le VPS.
 
 ## 3. Configuration du reverse proxy Nginx (à faire toi-même, une seule fois)
 
@@ -77,7 +78,7 @@ Run workflow**) déclenche le pipeline complet.
 ## Dépannage
 
 - **`docker compose pull` échoue avec une erreur d'auth** : vérifier que
-  `VPS_DEPLOY_PATH` pointe bien vers le dossier contenant le
-  `docker-compose.yml`.
+  `VPS_DEPLOY_PATH` pointe bien vers le dossier où `kzmvola-compose.yml` a
+  été déposé.
 - **502 Bad Gateway côté Nginx** : vérifier que le conteneur tourne
   (`docker ps`) et écoute bien sur `127.0.0.1:8080`.

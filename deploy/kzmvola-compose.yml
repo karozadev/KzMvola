@@ -1,3 +1,5 @@
+name: kzmvola
+
 services:
   kzmvola:
     image: ghcr.io/karozadev/kzmvola:latest

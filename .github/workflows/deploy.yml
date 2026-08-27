@@ -53,9 +53,25 @@ jobs:
       #   VPS_SSH_KEY      clé privée SSH (format PEM) correspondant à une
       #                    clé publique autorisée sur le VPS
       #   VPS_PORT         port SSH du VPS (optionnel, 22 par défaut)
-      #   VPS_DEPLOY_PATH  dossier absolu sur le VPS contenant
-      #                    docker-compose.yml et .env (voir deploy/)
-      - name: Deploy to VPS via SSH
+      #   VPS_DEPLOY_PATH  dossier absolu sur le VPS où déposer
+      #                    kzmvola-compose.yml (ex: /home/deployer, partagé
+      #                    avec d'autres projets — nom de fichier dédié pour
+      #                    ne pas écraser leur docker-compose.yml)
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Copy kzmvola-compose.yml to VPS
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USER }}
+          key: ${{ secrets.VPS_SSH_KEY }}
+          port: ${{ secrets.VPS_PORT || 22 }}
+          source: "deploy/kzmvola-compose.yml"
+          target: ${{ secrets.VPS_DEPLOY_PATH }}
+          strip_components: 1
+
+      - name: Pull and restart container on VPS
         uses: appleboy/ssh-action@v1.2.0
         env:
           GH_ACTOR: ${{ github.actor }}
@@ -71,6 +87,6 @@ jobs:
             set -e
             echo "$GH_TOKEN" | docker login ghcr.io -u "$GH_ACTOR" --password-stdin
             cd "$DEPLOY_PATH"
-            docker compose pull
-            docker compose up -d
+            docker compose -f kzmvola-compose.yml pull
+            docker compose -f kzmvola-compose.yml up -d
             docker image prune -f
