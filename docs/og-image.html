@@ -13,9 +13,8 @@
   /*
    * Source de public/og-image.png (1200 x 630).
    * Régénérer après toute retouche :
-   *   npm run build && npm run preview   # sert /docs à http://localhost:4173/docs/og-image.html
    *   chromium-browser --headless --disable-gpu --window-size=1200,630 \
-   *     --screenshot=public/og-image.png http://localhost:4173/docs/og-image.html
+   *     --screenshot=public/og-image.png "file://$PWD/docs/og-image.html"
    */
   * { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -95,18 +94,18 @@
       <span class="tag tag-red">Top frais</span>
       <span class="tag tag-line">Grille 2026</span>
     </div>
-    <h1>Optimiseur de frais de retrait MVola</h1>
+    <h1>Optimiseur de frais MVola</h1>
     <p class="sub">
-      Retrait direct ou retrait fractionné : trouvez la manière la moins chère de retirer votre argent.
+      Retrait ou transfert : en une fois ou fractionné, trouvez la manière de payer le moins de frais.
     </p>
 
     <div class="compare">
       <div class="chip direct">
-        <span class="k">Retrait direct · 265 000 Ar</span>
+        <span class="k">En une fois · 265 000 Ar</span>
         <span class="v">4 700 Ar</span>
       </div>
       <div class="chip opt">
-        <span class="k">Retrait fractionné</span>
+        <span class="k">Fractionné</span>
         <span class="v">3 825 Ar</span>
       </div>
       <div class="chip save">
@@ -116,7 +115,7 @@
   </div>
 
   <div class="foot">
-    <span>Grille tarifaire MVola Cash Point · Madagascar</span>
+    <span>Tarif officiel MVola · mvola.mg/tarifs</span>
     <span>Développé par <span class="dev">Stephanot Zafindratafa</span></span>
   </div>
 </body>

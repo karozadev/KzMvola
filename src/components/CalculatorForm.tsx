@@ -1,14 +1,21 @@
 import { useEffect, useRef, type ChangeEvent } from 'react';
-import { MAX_AMOUNT } from '../utils/mvolaFeeCalculator';
 import { countDigitsBeforeIndex, cursorPositionAfterDigits, formatAriary } from '../utils/format';
 
 interface CalculatorFormProps {
   rawInput: string;
   isOverLimit: boolean;
+  maxAmount: number;
+  label: string;
   onAmountChange: (raw: string) => void;
 }
 
-export function CalculatorForm({ rawInput, isOverLimit, onAmountChange }: CalculatorFormProps) {
+export function CalculatorForm({
+  rawInput,
+  isOverLimit,
+  maxAmount,
+  label,
+  onAmountChange,
+}: CalculatorFormProps) {
   const inputRef = useRef<HTMLInputElement>(null);
   const pendingDigitCountRef = useRef<number | null>(null);
 
@@ -29,9 +36,9 @@ export function CalculatorForm({ rawInput, isOverLimit, onAmountChange }: Calcul
     <div className="w-full md:max-w-xl">
       <label
         htmlFor="amount"
-        className="mb-2.5 mt-7 block text-[11px] font-bold uppercase tracking-[0.1em] text-nfx-grey"
+        className="mb-2.5 mt-6 block text-[11px] font-bold uppercase tracking-[0.1em] text-nfx-grey"
       >
-        Montant total à retirer
+        {label}
       </label>
       <div className="flex w-full items-center border border-nfx-border border-l-[3px] border-l-nfx-red bg-nfx-panel px-4 py-4">
         <input
@@ -49,7 +56,7 @@ export function CalculatorForm({ rawInput, isOverLimit, onAmountChange }: Calcul
       </div>
       {isOverLimit && (
         <p className="mt-2 text-sm font-medium text-nfx-red">
-          Montant maximum géré par la grille tarifaire : {formatAriary(MAX_AMOUNT)}.
+          Montant maximum géré par cette grille tarifaire : {formatAriary(maxAmount)}.
         </p>
       )}
     </div>

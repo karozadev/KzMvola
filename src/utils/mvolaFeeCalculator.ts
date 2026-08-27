@@ -1,78 +1,47 @@
 import type {
   CalculationResult,
   DirectResult,
-  FeeTier,
+  FeeGrid,
+  Operation,
   OptimizedResult,
-  Withdrawal,
 } from '../types/mvola';
 
-/**
- * Grille tarifaire officielle MVola (Cash Point), de 100 à 20 000 000 Ar.
- *
- * NB : le retrait effectué par un non-abonné MVola (case "RETRAIT PAR UN NON
- * ABONNÉ MVOLA" du tableau tarifaire) est gratuit mais correspond à un autre
- * type d'opération que le retrait "Cash Point" standard modélisé ici ; il
- * n'est donc volontairement pas inclus dans cette grille.
- */
-export const FEE_TIERS: FeeTier[] = [
-  { min: 100, max: 1_000, fee: 100 },
-  { min: 1_001, max: 5_000, fee: 150 },
-  { min: 5_001, max: 10_000, fee: 275 },
-  { min: 10_001, max: 20_000, fee: 550 },
-  { min: 20_001, max: 25_000, fee: 650 },
-  { min: 25_001, max: 50_000, fee: 1_300 },
-  { min: 50_001, max: 100_000, fee: 1_900 },
-  { min: 100_001, max: 250_000, fee: 3_400 },
-  { min: 250_001, max: 500_000, fee: 4_700 },
-  { min: 500_001, max: 1_000_000, fee: 8_800 },
-  { min: 1_000_001, max: 2_000_000, fee: 14_700 },
-  { min: 2_000_001, max: 3_000_000, fee: 19_600 },
-  { min: 3_000_001, max: 4_000_000, fee: 24_500 },
-  { min: 4_000_001, max: 5_000_000, fee: 29_400 },
-  { min: 5_000_001, max: 6_000_000, fee: 34_300 },
-  { min: 6_000_001, max: 7_000_000, fee: 39_200 },
-  { min: 7_000_001, max: 8_000_000, fee: 44_100 },
-  { min: 8_000_001, max: 9_000_000, fee: 49_000 },
-  { min: 9_000_001, max: 10_000_000, fee: 53_900 },
-  { min: 10_000_001, max: 11_000_000, fee: 59_000 },
-  { min: 11_000_001, max: 12_000_000, fee: 64_000 },
-  { min: 12_000_001, max: 13_000_000, fee: 69_000 },
-  { min: 13_000_001, max: 14_000_000, fee: 74_000 },
-  { min: 14_000_001, max: 15_000_000, fee: 79_000 },
-  { min: 15_000_001, max: 16_000_000, fee: 84_000 },
-  { min: 16_000_001, max: 17_000_000, fee: 89_000 },
-  { min: 17_000_001, max: 18_000_000, fee: 94_000 },
-  { min: 18_000_001, max: 19_000_000, fee: 98_000 },
-  { min: 19_000_001, max: 20_000_000, fee: 100_000 },
-];
+/** Montant minimum couvert par une grille (borne basse du premier palier). */
+export function gridMin(grid: FeeGrid): number {
+  return grid.tiers[0].min;
+}
 
-export const MIN_AMOUNT = FEE_TIERS[0].min;
-export const MAX_AMOUNT = FEE_TIERS[FEE_TIERS.length - 1].max;
+/** Montant maximum couvert par une grille (borne haute du dernier palier). */
+export function gridMax(grid: FeeGrid): number {
+  return grid.tiers[grid.tiers.length - 1].max;
+}
 
 /**
- * Sommets de tous les paliers du barème, utilisés comme "dénominations"
+ * Sommets de tous les paliers d'une grille, utilisés comme « dénominations »
  * candidates pour tester les fractionnements. Triés par ordre croissant.
- * Tous étant des multiples de 1 000 Ar, l'espace d'états explorable par
- * `calculateOptimizedSplit` reste borné à ~ montant / 1 000 (voir plus bas).
+ * Tous les barèmes MVola ont des sommets multiples de 1 000 Ar : l'espace
+ * d'états exploré par `bestDecomposition` reste borné à ~ montant / 1 000.
  */
-const SPLIT_BREAKPOINTS: readonly number[] = FEE_TIERS.map((t) => t.max);
+function splitBreakpoints(grid: FeeGrid): number[] {
+  return grid.tiers.map((t) => t.max);
+}
 
 /**
- * Renvoie le frais MVola applicable à un montant, ou `null` si le montant
- * est en dehors de la plage couverte par la grille tarifaire (0 à MAX_AMOUNT).
+ * Renvoie le frais MVola applicable à un montant pour une grille donnée, ou
+ * `null` si le montant dépasse le plafond couvert par la grille.
  */
-export function getFeeForAmount(amount: number): number | null {
+export function getFeeForAmount(grid: FeeGrid, amount: number): number | null {
   if (amount <= 0) return 0;
-  if (amount > MAX_AMOUNT) return null;
+  if (amount > gridMax(grid)) return null;
 
-  const tier = FEE_TIERS.find((t) => amount >= t.min && amount <= t.max);
-  // Sous le premier palier (< 100 Ar) : aucun frais.
+  const tier = grid.tiers.find((t) => amount >= t.min && amount <= t.max);
+  // Sous le premier palier (montant < borne minimale) : aucun frais.
   return tier ? tier.fee : 0;
 }
 
-/** Calcule le coût d'un retrait effectué en une seule transaction. */
-export function calculateDirect(amount: number): DirectResult {
-  const fee = getFeeForAmount(amount);
+/** Calcule le coût d'une opération effectuée en une seule transaction. */
+export function calculateDirect(grid: FeeGrid, amount: number): DirectResult {
+  const fee = getFeeForAmount(grid, amount);
   return {
     possible: fee !== null,
     amount,
@@ -80,7 +49,7 @@ export function calculateDirect(amount: number): DirectResult {
   };
 }
 
-type SplitState = { fee: number; withdrawals: Withdrawal[] };
+type SplitState = { fee: number; operations: Operation[] };
 
 /**
  * Calcule, par programmation dynamique mémoïsée, la meilleure décomposition
@@ -89,13 +58,15 @@ type SplitState = { fee: number; withdrawals: Withdrawal[] };
  *
  * Implémentation itérative (pile explicite, pas de récursion native) pour
  * ne jamais risquer de dépassement de pile d'appel, même sur de gros
- * montants. Comme tous les sommets de palier (`SPLIT_BREAKPOINTS`) sont des
- * multiples de 1 000 Ar, tous les montants intermédiaires rencontrés
- * partagent le même reste modulo 1 000 que `target` : le nombre d'états
- * distincts est donc borné par `target / 1 000` (~20 000 états au maximum
- * pour 20 000 000 Ar), ce qui reste largement gérable en performance.
+ * montants. Comme tous les sommets de palier sont des multiples de 1 000 Ar,
+ * tous les montants intermédiaires rencontrés partagent le même reste
+ * modulo 1 000 que `target` : le nombre d'états distincts est donc borné par
+ * `target / 1 000` (~20 000 états au maximum pour 20 000 000 Ar), ce qui
+ * reste largement gérable en performance.
  */
-function bestDecomposition(target: number): SplitState {
+function bestDecomposition(grid: FeeGrid, target: number): SplitState {
+  const min = gridMin(grid);
+  const breakpoints = splitBreakpoints(grid);
   const memo = new Map<number, SplitState>();
   const stack: number[] = [target];
 
@@ -103,7 +74,7 @@ function bestDecomposition(target: number): SplitState {
     const amount = stack[stack.length - 1];
 
     if (amount <= 0) {
-      memo.set(amount, { fee: 0, withdrawals: [] });
+      memo.set(amount, { fee: 0, operations: [] });
       stack.pop();
       continue;
     }
@@ -112,7 +83,7 @@ function bestDecomposition(target: number): SplitState {
       continue;
     }
 
-    const candidates = SPLIT_BREAKPOINTS.filter((bp) => bp <= amount);
+    const candidates = breakpoints.filter((bp) => bp <= amount);
     const missing = candidates
       .map((bp) => amount - bp)
       .filter((rest) => rest > 0 && !memo.has(rest));
@@ -124,29 +95,29 @@ function bestDecomposition(target: number): SplitState {
       continue;
     }
 
-    // Cas de base : retirer tout `amount` en une seule fois (si couvert par le barème).
+    // Cas de base : effectuer tout `amount` en une seule fois (si couvert par le barème).
     let bestFee = Infinity;
-    let bestWithdrawals: Withdrawal[] = [];
-    const isUnsplittableRemainder = amount !== target && amount < MIN_AMOUNT;
-    const directFee = isUnsplittableRemainder ? null : getFeeForAmount(amount);
+    let bestOperations: Operation[] = [];
+    const isUnsplittableRemainder = amount !== target && amount < min;
+    const directFee = isUnsplittableRemainder ? null : getFeeForAmount(grid, amount);
     if (directFee !== null) {
       bestFee = directFee;
-      bestWithdrawals = [{ amount, fee: directFee }];
+      bestOperations = [{ amount, fee: directFee }];
     }
 
     // Cas récursif : prélever un sommet de palier puis compléter avec le reste optimal.
     for (const bp of candidates) {
-      const chunkFee = getFeeForAmount(bp)!;
+      const chunkFee = getFeeForAmount(grid, bp)!;
       const rest = amount - bp;
-      const restResult = rest > 0 ? memo.get(rest)! : { fee: 0, withdrawals: [] };
+      const restResult = rest > 0 ? memo.get(rest)! : { fee: 0, operations: [] };
       const totalFee = chunkFee + restResult.fee;
       if (totalFee < bestFee) {
         bestFee = totalFee;
-        bestWithdrawals = [{ amount: bp, fee: chunkFee }, ...restResult.withdrawals];
+        bestOperations = [{ amount: bp, fee: chunkFee }, ...restResult.operations];
       }
     }
 
-    memo.set(amount, { fee: bestFee, withdrawals: bestWithdrawals });
+    memo.set(amount, { fee: bestFee, operations: bestOperations });
     stack.pop();
   }
 
@@ -154,35 +125,34 @@ function bestDecomposition(target: number): SplitState {
 }
 
 /**
- * Recherche, parmi toutes les décompositions possibles en sommets de
- * palier du barème (+ un reliquat), celle qui minimise la somme des frais
- * MVola pour `amount`.
+ * Recherche, parmi toutes les décompositions possibles en sommets de palier
+ * de la grille (+ un reliquat), celle qui minimise la somme des frais MVola
+ * pour `amount`.
  */
-export function calculateOptimizedSplit(amount: number): OptimizedResult {
+export function calculateOptimizedSplit(grid: FeeGrid, amount: number): OptimizedResult {
   if (amount <= 0) {
-    return { withdrawals: [], totalFee: 0, totalWithdrawn: 0 };
+    return { operations: [], totalFee: 0, totalAmount: 0 };
   }
 
-  const { fee, withdrawals } = bestDecomposition(amount);
+  const { fee, operations } = bestDecomposition(grid, amount);
 
   if (!Number.isFinite(fee)) {
-    // Aucune décomposition valide trouvée (ne devrait plus arriver en
-    // pratique, y compris au-delà de MAX_AMOUNT, grâce au chaînage de
-    // retraits au sommet le plus haut du barème).
-    return { withdrawals: [], totalFee: 0, totalWithdrawn: 0 };
+    // Aucune décomposition valide trouvée (ne devrait pas arriver en
+    // pratique grâce au chaînage d'opérations au sommet le plus haut).
+    return { operations: [], totalFee: 0, totalAmount: 0 };
   }
 
   return {
-    withdrawals,
+    operations,
     totalFee: fee,
-    totalWithdrawn: withdrawals.reduce((sum, w) => sum + w.amount, 0),
+    totalAmount: operations.reduce((sum, op) => sum + op.amount, 0),
   };
 }
 
-/** Calcule et compare l'option de retrait direct et l'option optimisée pour un montant donné. */
-export function calculateMvolaFees(amount: number): CalculationResult {
-  const direct = calculateDirect(amount);
-  const optimized = calculateOptimizedSplit(amount);
+/** Compare l'option directe et l'option optimisée pour un montant et une grille donnés. */
+export function calculateMvolaFees(grid: FeeGrid, amount: number): CalculationResult {
+  const direct = calculateDirect(grid, amount);
+  const optimized = calculateOptimizedSplit(grid, amount);
 
   const directFee = direct.possible ? (direct.fee ?? 0) : Infinity;
   const savings = direct.possible ? Math.max(0, directFee - optimized.totalFee) : 0;

@@ -1,10 +1,23 @@
 import { CalculatorForm } from './components/CalculatorForm';
 import { DirectOptionCard } from './components/DirectOptionCard';
+import { ModeTabs } from './components/ModeTabs';
 import { OptimizedOptionCard } from './components/OptimizedOptionCard';
 import { useMvolaCalculator } from './hooks/useMvolaCalculator';
+import { OFFICIAL_TARIFF_URL } from './utils/feeGrids';
 
 function App() {
-  const { rawInput, result, isOverLimit, handleAmountChange } = useMvolaCalculator();
+  const {
+    mode,
+    destination,
+    setMode,
+    setDestination,
+    config,
+    rawInput,
+    result,
+    isOverLimit,
+    maxAmount,
+    handleAmountChange,
+  } = useMvolaCalculator();
 
   return (
     <div className="min-h-screen bg-nfx-black text-nfx-white">
@@ -28,41 +41,60 @@ function App() {
             </span>
           </div>
           <h1 className="font-display text-[27px] uppercase leading-[1.12] tracking-[-0.01em] md:text-[40px] lg:text-[48px]">
-            Optimiseur de frais de retrait MVola
+            Optimiseur de frais MVola
           </h1>
           <p className="mt-3 max-w-[46ch] text-[14.5px] leading-[1.55] text-nfx-grey md:mt-4 md:text-base">
-            Comparez le retrait direct et le retrait fractionné pour payer le moins de frais
-            possible.
+            {config.heroSubtitle}
           </p>
         </header>
 
         <main className="px-5 md:px-10">
+          <ModeTabs
+            mode={mode}
+            destination={destination}
+            onModeChange={setMode}
+            onDestinationChange={setDestination}
+          />
+
           <CalculatorForm
             rawInput={rawInput}
             isOverLimit={isOverLimit}
+            maxAmount={maxAmount}
+            label={config.wording.amountLabel}
             onAmountChange={handleAmountChange}
           />
 
           {result && (
             <div className="mt-6 grid gap-4 md:mt-8 md:grid-cols-2 md:items-start">
-              <DirectOptionCard direct={result.direct} />
+              <DirectOptionCard direct={result.direct} wording={config.wording} />
               <OptimizedOptionCard
                 optimized={result.optimized}
                 direct={result.direct}
                 savings={result.savings}
+                wording={config.wording}
               />
             </div>
           )}
 
           {!result && !isOverLimit && (
             <p className="mt-6 text-center text-sm text-nfx-grey/60">
-              Saisissez un montant pour voir la meilleure stratégie de retrait.
+              Saisissez un montant pour voir la meilleure stratégie.
             </p>
           )}
         </main>
 
         <footer className="mt-auto px-5 pb-8 pt-10 text-center text-[11.5px] leading-[1.8] text-white/30 md:px-10 md:pb-10 md:pt-16">
-          Grille tarifaire MVola Cash Point · Madagascar
+          {config.gridCaption}
+          <br />
+          Tarif officiel :{' '}
+          <a
+            href={OFFICIAL_TARIFF_URL}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-white/45 underline hover:text-nfx-red"
+          >
+            mvola.mg/tarifs
+          </a>
           <br />
           Développé par{' '}
           <a

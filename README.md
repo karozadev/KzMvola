@@ -3,9 +3,9 @@
 
   # KzMvola
 
-  **Optimiseur de frais de retrait MVola**
+  **Optimiseur de frais MVola**
 
-  Calculez en temps réel la manière la plus économique de retirer de l'argent via MVola à Madagascar, en comparant le retrait direct et le retrait fractionné.
+  Calculez en temps réel la manière la plus économique de **retirer** ou de **transférer** de l'argent via MVola à Madagascar, en comparant l'opération directe et l'opération fractionnée.
 
   [![License: MIT](https://img.shields.io/badge/License-MIT-fbbf24.svg)](./LICENSE)
   ![Open Source](https://img.shields.io/badge/Open%20Source-%E2%9D%A4-10b981)
@@ -18,12 +18,14 @@
 
 ## À propos
 
-**KzMvola** est une web app PWA légère et rapide qui aide les utilisateurs de MVola (Cash Point) à Madagascar à réduire les frais payés lors de leurs retraits d'argent. Pour un montant donné, l'application compare :
+**KzMvola** est une web app PWA légère et rapide qui aide les utilisateurs de MVola à Madagascar à réduire les frais payés sur leurs **retraits** (Cash Point) et leurs **transferts d'argent**. Pour un montant donné, l'application compare :
 
-- **Le retrait direct** : le montant retiré en une seule transaction, avec les frais correspondants.
-- **Le retrait optimisé (fractionné)** : une décomposition du montant en plusieurs retraits, calculée pour minimiser la somme totale des frais selon la grille tarifaire officielle MVola.
+- **L'opération directe** : le montant retiré/transféré en une seule transaction, avec les frais correspondants.
+- **L'opération optimisée (fractionnée)** : une décomposition du montant en plusieurs opérations, calculée pour minimiser la somme totale des frais — et donc le nombre de fois qu'il faut retirer ou transférer pour payer moins.
 
 L'économie réalisée entre les deux options est affichée instantanément à chaque saisie.
+
+> **Toutes les grilles tarifaires de l'application proviennent du tarif officiel MVola : <https://www.mvola.mg/tarifs/>.**
 
 <div align="center">
   <img src="docs/screenshots/mobile.png" alt="KzMvola sur mobile" height="460" />
@@ -33,15 +35,21 @@ L'économie réalisée entre les deux options est affichée instantanément à c
 
 ## Fonctionnalités
 
+- 🔀 Deux modes : **Retrait** (Cash Point) et **Transfert d'argent**, avec 3 destinations de transfert (abonné MVola, autre opérateur, non-abonné)
 - ⚡ Calcul instantané pendant la saisie, sans rechargement de page
 - 🔢 Formatage automatique des milliers (`265 000 Ar`) avec un curseur qui reste à sa place
-- 🧮 Algorithme d'optimisation exhaustif basé sur les sommets de paliers tarifaires (250 000 / 500 000 / 1 000 000 Ar)
-- 🔗 Lien partageable : `?montant=265000` pré-remplit le montant à l'ouverture
+- 🧮 Algorithme d'optimisation exhaustif (programmation dynamique) sur les sommets de paliers de la grille active
+- 🔗 Lien partageable : `?mode=transfert&destination=non-abonne&montant=300000` pré-remplit tout à l'ouverture
 - 📱 PWA installable, pensée pour une utilisation rapide sur mobile
 - 🎨 Interface responsive au style « Netflix » (noir profond, rouge MVola, accents verts)
 - ✅ Logique de calcul couverte par des tests ([Vitest](https://vitest.dev/))
 
-## Grille tarifaire MVola (Cash Point)
+## Grilles tarifaires
+
+Barèmes repris **à l'identique du tarif officiel MVola** : <https://www.mvola.mg/tarifs/>
+(section « Retrait Cash Point » et section « Transfert d'argent »).
+
+### Retrait — Cash Point
 
 | Tranche (Ar)            | Frais (Ar) |
 | ------------------------ | ---------- |
@@ -74,6 +82,42 @@ L'économie réalisée entre les deux options est affichée instantanément à c
 | 17 000 001 – 18 000 000   | 94 000     |
 | 18 000 001 – 19 000 000   | 98 000     |
 | 19 000 001 – 20 000 000   | 100 000    |
+
+### Transfert d'argent
+
+Frais en Ariary. « – » = tranche non couverte par le barème officiel (les
+transferts hors abonné MVola sont plafonnés à 5 000 000 Ar).
+
+| Tranche (Ar)              | Vers un abonné MVola | Vers/depuis un autre opérateur | Vers un non-abonné |
+| ------------------------- | -------------------- | ------------------------------ | ------------------ |
+| 100 – 1 000               | 70                   | 200                            | 750                |
+| 1 001 – 5 000             | 70                   | 250                            | 750                |
+| 5 001 – 10 000            | 150                  | 500                            | 1 400              |
+| 10 001 – 25 000           | 250                  | 1 000                          | 1 800              |
+| 25 001 – 50 000           | 500                  | 1 500                          | 3 800              |
+| 50 001 – 100 000          | 1 000                | 2 000                          | 4 800              |
+| 100 001 – 250 000         | 1 900                | 3 500                          | 10 000             |
+| 250 001 – 500 000         | 1 900                | 5 000                          | 15 000             |
+| 500 001 – 1 000 000       | 3 200                | 8 500                          | 20 000             |
+| 1 000 001 – 2 000 000     | 3 800                | 12 000                         | 30 000             |
+| 2 000 001 – 3 000 000     | 5 000                | 14 500                         | 40 000             |
+| 3 000 001 – 4 000 000     | 6 300                | 19 500                         | 50 000             |
+| 4 000 001 – 5 000 000     | 7 500                | 24 000                         | 60 000             |
+| 5 000 001 – 6 000 000     | 9 400                | –                              | –                  |
+| 6 000 001 – 7 000 000     | 10 700               | –                              | –                  |
+| 7 000 001 – 8 000 000     | 12 500               | –                              | –                  |
+| 8 000 001 – 9 000 000     | 14 400               | –                              | –                  |
+| 9 000 001 – 10 000 000    | 15 700               | –                              | –                  |
+| 10 000 001 – 11 000 000   | 17 500               | –                              | –                  |
+| 11 000 001 – 12 000 000   | 18 800               | –                              | –                  |
+| 12 000 001 – 13 000 000   | 20 000               | –                              | –                  |
+| 13 000 001 – 14 000 000   | 21 300               | –                              | –                  |
+| 14 000 001 – 15 000 000   | 23 200               | –                              | –                  |
+| 15 000 001 – 16 000 000   | 25 000               | –                              | –                  |
+| 16 000 001 – 17 000 000   | 26 300               | –                              | –                  |
+| 17 000 001 – 18 000 000   | 28 200               | –                              | –                  |
+| 18 000 001 – 19 000 000   | 30 000               | –                              | –                  |
+| 19 000 001 – 20 000 000   | 31 300               | –                              | –                  |
 
 ## Stack technique
 
@@ -108,15 +152,16 @@ npm run build
 Les tests (`*.test.ts` / `*.test.tsx`, à côté du code qu'ils couvrent)
 protègent contre les régressions sur :
 
-- **la grille tarifaire et l'optimisation** (`src/utils/mvolaFeeCalculator.test.ts`) :
-  frais par palier, cohérence des décompositions, garantie que le
-  fractionnement ne coûte jamais plus cher que le retrait direct, respect
-  du minimum de 100 Ar par retrait ;
+- **les grilles et l'optimisation** (`src/utils/mvolaFeeCalculator.test.ts`,
+  `src/utils/feeGrids.test.ts`) : frais par palier sur chaque barème,
+  continuité des paliers, cohérence des décompositions, garantie que le
+  fractionnement ne coûte jamais plus cher que l'opération directe, respect
+  du minimum de 100 Ar, résolution mode/destination → grille ;
 - **le formatage des montants** (`src/utils/format.test.ts`) : séparateurs
   de milliers, analyse de saisie, repositionnement du curseur ;
 - **le hook et l'interface** (`src/hooks/useMvolaCalculator.test.ts`,
-  `src/App.test.tsx`) : calcul en temps réel, dépassement de plafond,
-  initialisation depuis `?montant=`.
+  `src/App.test.tsx`) : calcul en temps réel, changement de mode et de
+  destination, dépassement de plafond, initialisation depuis l'URL.
 
 Ils sont également exécutés en CI (job `verify`) avant tout build ou
 déploiement.
@@ -125,12 +170,14 @@ déploiement.
 
 ```
 src/
-├── types/mvola.ts               # Interfaces (paliers, résultats)
+├── types/mvola.ts               # Interfaces (grille, paliers, résultats)
 ├── utils/
-│   ├── mvolaFeeCalculator.ts    # Grille tarifaire + logique d'optimisation
+│   ├── feeGrids.ts              # Les 4 barèmes officiels + formulations par mode
+│   ├── mvolaFeeCalculator.ts    # Logique d'optimisation générique (paramétrée par grille)
 │   └── format.ts                # Formatage des montants et gestion du curseur
-├── hooks/useMvolaCalculator.ts  # État et calcul en temps réel
+├── hooks/useMvolaCalculator.ts  # État (mode / destination / montant) et calcul
 ├── components/
+│   ├── ModeTabs.tsx             # Onglets Retrait / Transfert + choix de destination
 │   ├── CalculatorForm.tsx
 │   ├── DirectOptionCard.tsx
 │   └── OptimizedOptionCard.tsx

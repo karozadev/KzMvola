@@ -7,25 +7,26 @@ aperçus de partage.
 
 | Fichier | Format | Contenu |
 | --- | --- | --- |
-| [screenshots/mobile.png](screenshots/mobile.png) | 400 × 1120 | Vue mobile, style Netflix, exemple à 265 000 Ar |
-| [screenshots/desktop.png](screenshots/desktop.png) | 1400 × 900 | Vue desktop, cartes « Retrait direct » / « Retrait fractionné » côte à côte |
+| [screenshots/mobile.png](screenshots/mobile.png) | 400 × 1180 | Vue mobile — mode Retrait, exemple à 265 000 Ar |
+| [screenshots/desktop.png](screenshots/desktop.png) | 1400 × 1000 | Vue desktop — mode Transfert « non-abonné », exemple à 300 000 Ar |
 
-Elles sont prises sur le build de production servi localement, avec le
-montant pré-rempli via le paramètre d'URL `?montant=` :
+Elles sont prises sur le build de production servi localement, l'état
+(mode / destination / montant) étant pré-rempli via l'URL
+(`?mode=`, `?destination=`, `?montant=`) :
 
 ```bash
 npm run build
 npm run preview          # sert http://localhost:4173
 
-# Mobile
-chromium --headless --disable-gpu --hide-scrollbars --window-size=400,1120 \
+# Mobile (Retrait)
+chromium --headless --disable-gpu --hide-scrollbars --window-size=400,1180 \
   --screenshot=docs/screenshots/mobile.png \
   "http://localhost:4173/?montant=265000"
 
-# Desktop
-chromium --headless --disable-gpu --hide-scrollbars --window-size=1400,900 \
+# Desktop (Transfert vers un non-abonné)
+chromium --headless --disable-gpu --hide-scrollbars --window-size=1400,1000 \
   --screenshot=docs/screenshots/desktop.png \
-  "http://localhost:4173/?montant=265000"
+  "http://localhost:4173/?mode=transfert&destination=non-abonne&montant=300000"
 ```
 
 ## Aperçu de partage (Open Graph / Twitter Card)
@@ -36,7 +37,7 @@ affichée quand le lien est partagé sur Facebook, WhatsApp, LinkedIn, X, etc.
 Elle reprend la charte de l'application (noir profond, rouge MVola,
 Archivo Black, accents verts).
 
-Pour la régénérer après une retouche :
+Pour la régénérer après une retouche (aucun serveur nécessaire) :
 
 ```bash
 chromium --headless --disable-gpu --hide-scrollbars --window-size=1200,630 \

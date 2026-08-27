@@ -1,14 +1,22 @@
 import type { DirectResult, OptimizedResult } from '../types/mvola';
+import type { OperationWording } from '../utils/feeGrids';
 import { formatAriary } from '../utils/format';
 
 interface OptimizedOptionCardProps {
   optimized: OptimizedResult;
   direct: DirectResult;
   savings: number;
+  wording: OperationWording;
 }
 
-export function OptimizedOptionCard({ optimized, direct, savings }: OptimizedOptionCardProps) {
-  const hasSplit = optimized.withdrawals.length > 1;
+export function OptimizedOptionCard({
+  optimized,
+  direct,
+  savings,
+  wording,
+}: OptimizedOptionCardProps) {
+  const count = optimized.operations.length;
+  const hasSplit = count > 1;
   const directFee = direct.possible ? (direct.fee ?? 0) : 0;
   const savedPct = directFee > 0 ? Math.round((savings / directFee) * 100) : 0;
 
@@ -16,7 +24,7 @@ export function OptimizedOptionCard({ optimized, direct, savings }: OptimizedOpt
     <div className="border border-nfx-border bg-nfx-panel">
       <div className="flex items-center justify-between border-b border-nfx-border bg-nfx-raised px-[18px] py-3.5">
         <span className="text-[11px] font-extrabold uppercase tracking-[0.08em] text-nfx-grey">
-          Retrait fractionné
+          {wording.splitBadge}
         </span>
         <span className="text-[13px] font-extrabold text-nfx-green">
           {hasSplit && savedPct > 0 ? `${savedPct}% de frais en moins` : 'Optimal'}
@@ -25,21 +33,19 @@ export function OptimizedOptionCard({ optimized, direct, savings }: OptimizedOpt
 
       <div className="p-[18px]">
         <p className="mb-1 text-[13px] text-nfx-grey">
-          {hasSplit
-            ? `Retrait fractionné en ${optimized.withdrawals.length} opérations`
-            : 'Aucun fractionnement nécessaire'}
+          {hasSplit ? wording.splitCount(count) : 'Aucun fractionnement nécessaire'}
         </p>
 
-        {optimized.withdrawals.map((withdrawal, index) => (
+        {optimized.operations.map((operation, index) => (
           <div
-            key={`${withdrawal.amount}-${index}`}
+            key={`${operation.amount}-${index}`}
             className="flex items-baseline justify-between border-b border-dashed border-nfx-border py-2 text-sm text-nfx-grey last:border-b-0"
           >
             <span>
-              Retrait {index + 1} · {formatAriary(withdrawal.amount)}
+              {wording.itemNoun} {index + 1} · {formatAriary(operation.amount)}
             </span>
             <span className="font-mono font-semibold text-nfx-white">
-              {formatAriary(withdrawal.fee)}
+              {formatAriary(operation.fee)}
             </span>
           </div>
         ))}
@@ -59,7 +65,7 @@ export function OptimizedOptionCard({ optimized, direct, savings }: OptimizedOpt
           <div className="mt-4 flex items-center gap-2 border-l-[3px] border-nfx-green bg-nfx-green/10 px-3.5 py-2.5">
             <span className="font-display text-base text-nfx-green">−{formatAriary(savings)}</span>
             <span className="text-[12.5px] font-semibold text-nfx-grey">
-              économisés vs. retrait direct
+              {wording.savingsSuffix}
             </span>
           </div>
         )}
