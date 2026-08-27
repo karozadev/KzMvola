@@ -46,3 +46,33 @@ chromium --headless --disable-gpu --hide-scrollbars --window-size=1200,630 \
 
 Les balises `og:image` / `twitter:image` sont déclarées dans
 [`index.html`](../index.html).
+
+## Icônes PWA
+
+[pwa-icon.html](pwa-icon.html) est la source des icônes de `public/`
+(fond rouge MVola, « Kz » en Archivo Black). Chrome sur Android exige des
+icônes **PNG** en 192 et 512 px pour proposer l'installation ; une icône
+SVG seule ne suffit pas.
+
+| Fichier | Taille | `purpose` |
+| --- | --- | --- |
+| `public/pwa-192.png` | 192 | any |
+| `public/pwa-512.png` | 512 | any |
+| `public/pwa-maskable-512.png` | 512 | maskable (glyphe dans la zone de sécurité) |
+| `public/apple-touch-icon.png` | 180 | iOS « Sur l'écran d'accueil » |
+
+```bash
+ICON="file://$PWD/docs/pwa-icon.html"
+for s in 192 512; do
+  chromium --headless --disable-gpu --window-size=$s,$s \
+    --screenshot=public/pwa-$s.png "$ICON"
+done
+chromium --headless --disable-gpu --window-size=512,512 \
+  --screenshot=public/pwa-maskable-512.png "$ICON?mask=1"
+chromium --headless --disable-gpu --window-size=180,180 \
+  --screenshot=public/apple-touch-icon.png "$ICON"
+```
+
+Les icônes sont référencées dans le manifeste
+([`vite.config.ts`](../vite.config.ts)) et dans `<head>`
+([`index.html`](../index.html)).
